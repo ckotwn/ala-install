@@ -55,7 +55,7 @@ BEGIN
             data_resource_uid AS "dataResourceUid",
             regexp_replace(regexp_replace(creator, '[|''"&]+',''), E'[\\n\\r]+', ' ', 'g' ) AS creator,
             regexp_replace(regexp_replace(title, '[|''"&]+',''), E'[\\n\\r]+', ' ', 'g' ) AS title,
-            regexp_replace(regexp_replace(description, '[|''"&]+',''), E'[\\n\\r]+', ' ', 'g' )  AS title,
+            regexp_replace(regexp_replace(description, '[|''"&]+',''), E'[\\n\\r]+', ' ', 'g' )  AS description,
             regexp_replace(regexp_replace(rights, '[|''"&]+',''), E'[\\n\\r]+', ' ', 'g' )  AS rights,
             regexp_replace(regexp_replace(rights_holder, '[|''"&]+',''), E'[\\n\\r]+', ' ', 'g' )  AS "rightsHolder",
             regexp_replace(regexp_replace(license, '[|''"&]+',''), E'[\\n\\r]+', ' ', 'g' )  AS license,
@@ -73,7 +73,7 @@ BEGIN
             TO_CHAR(date_uploaded :: DATE, 'yyyy-mm') AS "dateUploadedYearMonth"
         from image i
             left outer join license l ON l.id = i.recognised_license_id
-        where date_deleted is NULL
+        where date_deleted is NULL and is_duplicate_of_id is NULL
         )
         TO '{{image_service_export_dir | default('/data/image-service/exports') }}/images-index.csv' WITH CSV DELIMITER '$' HEADER;
 END;
@@ -89,23 +89,24 @@ BEGIN
         select
             image_identifier as "imageID",
             original_filename as "identifier",
-            audience,
-            contributor,
-            created,
-            creator,
-            description,
-            mime_type as "format",
-            license,
-            publisher,
-            dc_references as "references",
-            rights_holder  as "rightsHolder",
-            source,
-            title,
-            type
+            regexp_replace(audience,  E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'')  AS "audience",
+            regexp_replace(contributor,  E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'')  AS "contributor",
+            regexp_replace(created,  E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'')  AS "created",
+            regexp_replace(creator,  E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'' ) AS creator,
+            regexp_replace(description,  E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'' )  AS description,
+            regexp_replace(mime_type,  E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'' )  AS format,
+            regexp_replace(license, E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'' )  AS license,
+            regexp_replace(publisher, E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'' )  AS publisher,
+            regexp_replace(dc_references, E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'' )  AS "references",
+            regexp_replace(rights_holder, E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'' )  AS "rightsHolder",
+            regexp_replace(source, E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'' )  AS "source",
+            regexp_replace(title,  E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'' )  AS "title",
+            regexp_replace(type,  E''[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+'', '' '', ''g'' )  AS "type",
+            is_duplicate_of_id
             from image i
             where data_resource_uid = %L
         )
-    TO %L (FORMAT CSV)'
+    TO %L (FORMAT CSV, ESCAPE ''\'', ENCODING ''UTF8'')'
         , uid, output_file);
 END;
 $$ LANGUAGE plpgsql;
