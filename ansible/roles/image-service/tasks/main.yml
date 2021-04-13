@@ -3,6 +3,7 @@
     - image-service
     - properties
     - data_import
+    - export-procs
 
 - name: "Ensure system user for image-service"
   user:
@@ -123,23 +124,25 @@
   template: src={{ item }} dest={{data_dir}}/image-service/setup/
   with_items:
     - "sql/image-service-export.sql"
-  notify:
-     - restart image-service
+#  notify:
+#     - restart image-service
   tags:
     - deploy
     - image-service
     - properties
+    - export-procs
 
 - name: create stored procedures for export functions
   command: "psql -d {{ image_service_db_username }} -f {{data_dir}}/image-service/setup/image-service-export.sql"
   become_user: postgres
   ignore_errors: no
-  notify:
-     - restart image-service
+#  notify:
+#     - restart image-service
   tags:
     - image-service
     - properties
     - db
+    - export-procs
 
 - name: add image-service jar and setup service
   include_role:
