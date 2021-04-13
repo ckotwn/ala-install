@@ -87,24 +87,25 @@ BEGIN
     COPY
         (
         select
-            image_identifier as "imageID",
-            NULLIF(regexp_replace(original_filename, ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "identifier",
-            NULLIF(regexp_replace(audience,          ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "audience",
-            NULLIF(regexp_replace(contributor,       ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "contributor",
-            NULLIF(regexp_replace(created,           ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "created",
-            NULLIF(regexp_replace(creator,           ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "creator",
-            NULLIF(regexp_replace(description,       ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "description",
-            NULLIF(regexp_replace(mime_type,         ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "format",
-            NULLIF(regexp_replace(license,           ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "license",
-            NULLIF(regexp_replace(publisher,         ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "publisher",
-            NULLIF(regexp_replace(dc_references,     ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "references",
-            NULLIF(regexp_replace(rights_holder,     ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "rightsHolder",
-            NULLIF(regexp_replace(source,            ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "source",
-            NULLIF(regexp_replace(title,             ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "title",
-            NULLIF(regexp_replace(type,              ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "type",
-            is_duplicate_of_id
+            i.image_identifier as "imageID",
+            NULLIF(regexp_replace(i.original_filename, ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "identifier",
+            NULLIF(regexp_replace(i.audience,          ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "audience",
+            NULLIF(regexp_replace(i.contributor,       ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "contributor",
+            NULLIF(regexp_replace(i.created,           ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "created",
+            NULLIF(regexp_replace(i.creator,           ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "creator",
+            NULLIF(regexp_replace(i.description,       ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "description",
+            NULLIF(regexp_replace(i.mime_type,         ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "format",
+            NULLIF(regexp_replace(i.license,           ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "license",
+            NULLIF(regexp_replace(i.publisher,         ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "publisher",
+            NULLIF(regexp_replace(i.dc_references,     ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "references",
+            NULLIF(regexp_replace(i.rights_holder,     ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "rightsHolder",
+            NULLIF(regexp_replace(i.source,            ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "source",
+            NULLIF(regexp_replace(i.title,             ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "title",
+            NULLIF(regexp_replace(i.type,              ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "type",
+            di.image_identifier
             from image i
-            where data_resource_uid = %L
+            left outer join image di ON di.id = i.is_duplicate_of_id
+            where i.data_resource_uid = %L
         )
     TO %L (FORMAT CSV, ESCAPE ''\'', ENCODING ''UTF8'')'
         , uid, output_file);
