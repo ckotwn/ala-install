@@ -102,9 +102,8 @@ BEGIN
             NULLIF(regexp_replace(i.source,            ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "source",
             NULLIF(regexp_replace(i.title,             ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "title",
             NULLIF(regexp_replace(i.type,              ''\\P{Cc}\\P{Cn}\\P{Cs}\\P{Cf}'',  '''', ''g''), '''')  AS  "type",
-            di.image_identifier
+            i.is_duplicate_of_id
             from image i
-            left outer join image di ON di.id = i.is_duplicate_of_id
             where i.data_resource_uid = %L
         )
     TO %L (FORMAT CSV, ESCAPE ''\'', ENCODING ''UTF8'')'
