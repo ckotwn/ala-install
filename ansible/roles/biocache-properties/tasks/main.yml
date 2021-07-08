@@ -2,7 +2,8 @@
   tags:
     - properties
     - biocache-properties
-    - biocache-layers    
+    - biocache-layers
+    - biocache-config-properties
 
 - name: ensure target directories exist
   file: path={{item}} state=directory
@@ -19,6 +20,7 @@
   tags:
     - properties
     - biocache-properties
+    - biocache-config-properties
 
 - name: copy biocache groups config
   copy: src=groups.json dest={{data_dir}}/biocache/config/groups.json
